@@ -6,6 +6,7 @@ from river import drift
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 
+
 def re_to_bool(val, threshold=0.15):
     return 0 if val <= threshold else 1
 
@@ -16,7 +17,6 @@ def mean_absolute_percentage_error(y_true, y_pred):  # todo: how to choice a sui
     y_true = y_true[non_zero_indices]
     y_pred = y_pred[non_zero_indices]
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-
 
 
 class DataProcessor:
@@ -50,7 +50,7 @@ def detect_drift_in_same_environment(data_path):
     rfr.fit(x_train, y_train)
     y_pre = rfr.predict(x_test)
     #mmre = abs(y_pre - y_test) / y_test
-    mmse = (abs(y_pre-y_test)) ^ 2
+    mmse = (abs(y_pre - y_test)) ^ 2
     PredPDF = pd.DataFrame({"实际值": y_test,
                             "预测值": y_pre,
                             "误差": mmse})
@@ -112,14 +112,16 @@ def detect_drift_in_different_environment(basedata, others: list):
     )
     mmre0 = abs(y_pre0 - y_test) / y_test
     #mre0 = mean_absolute_percentage_error(y_test, y_pre0)
-    mmse0 = (y_pre0 - y_test)**2
+    mmse0 = (y_pre0 - y_test) ** 2
     mse0 = mean_squared_error(y_test, y_pre0)
     print("in base dataset(without drift), the mre value is" + str(ae0))
-    phtest = drift.PageHinkley(delta=0.002,threshold=10)
+    phtest = drift.PageHinkley(delta=0.002, threshold=10)
     adwin = drift.ADWIN()
     kswin = drift.KSWIN()
     ddm = drift.binary.DDM()
     eddm = drift.binary.EDDM()
+    hddma = drift.binary.HDDM_A()
+    hddmw = drift.binary.HDDM_W()
 
     print("------base test set------")
     PredPDF = pd.DataFrame({"实际值": y_test,
@@ -148,14 +150,22 @@ def detect_drift_in_different_environment(basedata, others: list):
         if eddm.drift_detected:
             print(f"eddmChange detected at index {i}, input value: {val}")
 
+        hddma.update(re_to_bool(val))
+        if hddma.drift_detected:
+            print(f"hddmaChange detected at index {i}, input value: {val}")
+
+        hddmw.update(re_to_bool(val))
+        if hddmw.drift_detected:
+            print(f"hddmaChange detected at index {i}, input value: {val}")
+
     for dataset in others:
         dp = DataProcessor(dataset)
         print("------in env:" + dataset.split('/')[-1] + "sample count: " + str(dp.sample_count) + "------")
         X, Y = dp.data_formulate()
         y_pre = rfr.predict(X)
         mae = abs(y_pre - Y)
-        mmre = abs(y_pre - Y)/Y
-        mmse = (abs(y_pre - Y))**2
+        mmre = abs(y_pre - Y) / Y
+        mmse = (abs(y_pre - Y)) ** 2
         #mre = mean_absolute_percentage_error(Y, y_pre)
         mse = mean_squared_error(Y, y_pre)
         print("mre value is" + str(mse))
@@ -197,6 +207,20 @@ def detect_drift_in_different_environment(basedata, others: list):
             result = re_to_bool(val)
             eddm.update(result)
             if eddm.drift_detected:
+                print(f"Change detected at index {i}, input value: {val}")
+
+        print("HDDMA WITH RELATIVE ERROR...")
+        for i, val in enumerate(mae):
+            result = re_to_bool(val)
+            hddma.update(result)
+            if hddma.drift_detected:
+                print(f"Change detected at index {i}, input value: {val}")
+
+        print("HDDMW WITH RELATIVE ERROR...")
+        for i, val in enumerate(mae):
+            result = re_to_bool(val)
+            hddmw.update(result)
+            if hddmw.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
 
