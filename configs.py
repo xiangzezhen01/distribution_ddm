@@ -1,0 +1,1 @@
+MIN_SAMPLES = 2
