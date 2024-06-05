@@ -4,8 +4,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from river import drift
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
 
-def re_to_bool(val, threshold=0.5):
+def re_to_bool(val, threshold=0.15):
     return 0 if val <= threshold else 1
 
 
@@ -52,9 +53,9 @@ def detect_drift_in_same_environment(data_path):
     mmse = (abs(y_pre-y_test)) ^ 2
     PredPDF = pd.DataFrame({"实际值": y_test,
                             "预测值": y_pre,
-                            "误差": mmre})
+                            "误差": mmse})
     print("[Message] Prediction Results on The Test Data Set for RandomForestRegressor:")
-    # print(PredPDF)
+    print(PredPDF)
     # using PH test:
     print("PH TEST WITH RELATIVE ERROR...")
     phtest = drift.PageHinkley()
@@ -105,18 +106,28 @@ def detect_drift_in_different_environment(basedata, others: list):
     rfr.fit(x_train, y_train)
     print("NO drift sample count: " + str(dp.test_count))
     y_pre0 = rfr.predict(x_test)
+    mae0 = abs(y_pre0 - y_test)
+    ae0 = mean_absolute_error(
+        y_test, y_pre0
+    )
     mmre0 = abs(y_pre0 - y_test) / y_test
     #mre0 = mean_absolute_percentage_error(y_test, y_pre0)
     mmse0 = (y_pre0 - y_test)**2
     mse0 = mean_squared_error(y_test, y_pre0)
-    print("in base dataset(without drift), the mre value is" + str(mse0))
-    phtest = drift.PageHinkley(delta=0.002)
+    print("in base dataset(without drift), the mre value is" + str(ae0))
+    phtest = drift.PageHinkley(delta=0.002,threshold=10)
     adwin = drift.ADWIN()
     kswin = drift.KSWIN()
     ddm = drift.binary.DDM()
     eddm = drift.binary.EDDM()
+
     print("------base test set------")
-    for i, val in enumerate(mmre0):
+    PredPDF = pd.DataFrame({"实际值": y_test,
+                            "预测值": y_pre0,
+                            "误差": mae0})
+    print("[Message] Prediction Results on The Test Data Set for RandomForestRegressor:")
+    print(PredPDF)
+    for i, val in enumerate(mae0):
         phtest.update(val)
         if phtest.drift_detected:
             print(f"phChange detected at index {i}, input value: {val}")
@@ -142,41 +153,47 @@ def detect_drift_in_different_environment(basedata, others: list):
         print("------in env:" + dataset.split('/')[-1] + "sample count: " + str(dp.sample_count) + "------")
         X, Y = dp.data_formulate()
         y_pre = rfr.predict(X)
+        mae = abs(y_pre - Y)
         mmre = abs(y_pre - Y)/Y
         mmse = (abs(y_pre - Y))**2
         #mre = mean_absolute_percentage_error(Y, y_pre)
         mse = mean_squared_error(Y, y_pre)
         print("mre value is" + str(mse))
+        PredPDF = pd.DataFrame({"实际值": Y,
+                                "预测值": y_pre,
+                                "误差": mae})
+        print("[Message] Prediction Results on The Test Data Set for RandomForestRegressor:")
+        print(PredPDF)
         print("PH TEST WITH RELATIVE ERROR...")
 
-        for i, val in enumerate(mmre):
+        for i, val in enumerate(mae):
             phtest.update(val)
             if phtest.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
         print("ADWIN WITH RELATIVE ERROR...")
 
-        for i, val in enumerate(mmre):
+        for i, val in enumerate(mae):
             adwin.update(val)
             if adwin.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
         print("KSWIN WITH RELATIVE ERROR...")
 
-        for i, val in enumerate(mmre):
+        for i, val in enumerate(mae):
             kswin.update(val)
             if kswin.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
         print("DDM WITH RELATIVE ERROR...")
-        for i, val in enumerate(mmre):
+        for i, val in enumerate(mae):
             result = re_to_bool(val)
             ddm.update(result)
             if ddm.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
         print("EDDM WITH RELATIVE ERROR...")
-        for i, val in enumerate(mmre):
+        for i, val in enumerate(mae):
             result = re_to_bool(val)
             eddm.update(result)
             if eddm.drift_detected:
