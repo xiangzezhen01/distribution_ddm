@@ -42,6 +42,10 @@ class DataProcessor:
         Y = self.data.iloc[:, -1]
         return X, Y
 
+    def get_whole_data(self):
+        df = pd.read_csv('data/storm-obj1_feature6.csv')
+        ndarray = df.values
+        return ndarray
 
 def detect_drift_in_same_environment(data_path):
     dp = DataProcessor(data_path)
