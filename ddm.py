@@ -6,8 +6,10 @@ from river import drift
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 
+import configs
 
-def re_to_bool(val, threshold=0.15):
+
+def re_to_bool(val, threshold = configs.RESIDUAL_ERRORS_THRESHOLD):
     return 0 if val <= threshold else 1
 
 
@@ -61,28 +63,28 @@ def detect_drift_in_same_environment(data_path):
     print("[Message] Prediction Results on The Test Data Set for RandomForestRegressor:")
     print(PredPDF)
     # using PH test:
-    print("PH TEST WITH RELATIVE ERROR...")
+    print("PH TEST WITH ABSOLUTE ERROR...")
     phtest = drift.PageHinkley()
     for i, val in enumerate(mmse):
         phtest.update(val)
         if phtest.drift_detected:
             print(f"Change detected at index {i}, input value: {val}")
 
-    print("ADWIN WITH RELATIVE ERROR...")
+    print("ADWIN WITH ABSOLUTE ERROR...")
     adwin = drift.ADWIN()
     for i, val in enumerate(mmse):
         adwin.update(val)
         if adwin.drift_detected:
             print(f"Change detected at index {i}, input value: {val}")
 
-    print("KSWIN WITH RELATIVE ERROR...")
+    print("KSWIN WITH ABSOLUTE ERROR...")
     kswin = drift.KSWIN()
     for i, val in enumerate(mmse):
         kswin.update(val)
         if kswin.drift_detected:
             print(f"Change detected at index {i}, input value: {val}")
 
-    print("DDM WITH RELATIVE ERROR...")
+    print("DDM WITH ABSOLUTE ERROR...")
     ddm = drift.binary.DDM()
     for i, val in enumerate(mmse):
         if val > 0.5:
@@ -92,7 +94,7 @@ def detect_drift_in_same_environment(data_path):
         if ddm.drift_detected:
             print(f"Change detected at index {i}, input value: {val}")
 
-    print("EDDM WITH RELATIVE ERROR...")
+    print("EDDM WITH ABSOLUTE ERROR...")
     eddm = drift.binary.EDDM()
     for i, val in enumerate(mmse):
         if val > 0.5:
@@ -124,8 +126,8 @@ def detect_drift_in_different_environment(basedata, others: list):
     kswin = drift.KSWIN()
     ddm = drift.binary.DDM()
     eddm = drift.binary.EDDM()
-    hddma = drift.binary.HDDM_A()
-    hddmw = drift.binary.HDDM_W()
+    hddma = drift.binary.HDDM_A()  # DDM based on Hoeffding's bounds with moving average-test
+    hddmw = drift.binary.HDDM_W()  # DDM based on Hoeffding's bounds with moving weighted average-test
 
     print("------base test set------")
     PredPDF = pd.DataFrame({"实际值": y_test,
@@ -178,49 +180,49 @@ def detect_drift_in_different_environment(basedata, others: list):
                                 "误差": mae})
         print("[Message] Prediction Results on The Test Data Set for RandomForestRegressor:")
         print(PredPDF)
-        print("PH TEST WITH RELATIVE ERROR...")
+        print("PH TEST WITH ABSOLUTE ERROR...")
 
         for i, val in enumerate(mae):
             phtest.update(val)
             if phtest.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("ADWIN WITH RELATIVE ERROR...")
+        print("ADWIN WITH ABSOLUTE ERROR...")
 
         for i, val in enumerate(mae):
             adwin.update(val)
             if adwin.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("KSWIN WITH RELATIVE ERROR...")
+        print("KSWIN WITH ABSOLUTE ERROR...")
 
         for i, val in enumerate(mae):
             kswin.update(val)
             if kswin.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("DDM WITH RELATIVE ERROR...")
+        print("DDM WITH ABSOLUTE ERROR...")
         for i, val in enumerate(mae):
             result = re_to_bool(val)
             ddm.update(result)
             if ddm.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("EDDM WITH RELATIVE ERROR...")
+        print("EDDM WITH ABSOLUTE ERROR...")
         for i, val in enumerate(mae):
             result = re_to_bool(val)
             eddm.update(result)
             if eddm.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("HDDMA WITH RELATIVE ERROR...")
+        print("HDDMA WITH ABSOLUTE ERROR...")
         for i, val in enumerate(mae):
             result = re_to_bool(val)
             hddma.update(result)
             if hddma.drift_detected:
                 print(f"Change detected at index {i}, input value: {val}")
 
-        print("HDDMW WITH RELATIVE ERROR...")
+        print("HDDMW WITH ABSOLUTE ERROR...")
         for i, val in enumerate(mae):
             result = re_to_bool(val)
             hddmw.update(result)
@@ -232,5 +234,18 @@ data_path = "data/storm-obj1_feature6.csv"
 other_data1 = "data/storm-obj1_feature7.csv"
 other_data2 = "data/storm-obj1_feature8.csv"
 other_data3 = "data/storm-obj1_feature9.csv"
-detect_drift_in_different_environment(data_path, [other_data1, other_data2, other_data3])
+
+other_data4 = "data/storm-obj2_feature6.csv"
+other_data5 = "data/storm-obj2_feature7.csv"
+other_data6 = "data/storm-obj2_feature8.csv"
+other_data7 = "data/storm-obj2_feature9.csv"
+# detect_drift_in_different_environment(data_path, [other_data1, other_data2, other_data3, other_data4, other_data5, other_data6, other_data7])
+
+# detect_drift_in_different_environment(data_path, [other_data7, other_data2, other_data3, other_data4, other_data5, other_data6, other_data1])
+
+
+#  目前没有添加适应算法
 #  detect_drift_in_same_environment(data_path)
+envlist = [other_data1, other_data2, other_data3, other_data4,other_data5, other_data6, other_data7]
+for env in envlist:
+    detect_drift_in_different_environment(basedata=data_path, others=[env])

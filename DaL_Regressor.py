@@ -39,7 +39,7 @@ class DaL_Regressor:
         for i in range(self.feather_count):
             weight = feature_weights[i]
             self.weights.append(weight)
-
+        self.train_set = self.whole_data[self.train_index]
         self.clusters = self.get_cluster(self.whole_data[self.train_index]) # todo: right？
         self.train_RFC()
         pass

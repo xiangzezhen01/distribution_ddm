@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+# for pre
 # 生成数据
 np.random.seed(0)
 # 两个不同区域的x值
