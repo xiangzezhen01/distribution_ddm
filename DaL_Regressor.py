@@ -10,7 +10,7 @@ from ddm import DataProcessor
 from utils.general import build_model, recursive_dividing
 from numpy import recfromcsv
 
-# todo: 1. 为什么决策树用于划分，随机森林用于分类 2. clustering_indexs and clustering_index_all 3. total index and training index(no zero)  4. if N_train to big?
+# todo:  2. clustering_indexs and clustering_index_all 3. total index and training index(no zero)  4. if N_train to big?
 
 def get_whole_data(path):
     df = pd.read_csv(path)
@@ -20,6 +20,7 @@ def get_whole_data(path):
 class DaL_Regressor:
 
     def __init__(self, data_path):
+        self.RFC = None
         self.whole_data = None
         self.other_env_data = None
         self.data_path = data_path
@@ -39,7 +40,8 @@ class DaL_Regressor:
             weight = feature_weights[i]
             self.weights.append(weight)
 
-        self.clusters = []
+        self.clusters = self.get_cluster(self.whole_data[self.train_index]) # todo: right？
+        self.train_RFC()
         pass
 
 
@@ -57,7 +59,10 @@ class DaL_Regressor:
         return cluster_indexes_all
 
     # build a random forest classifier to classify testing samples
-    def train_RFC(self, X, Y):
+    def train_RFC(self):
+        pass
+
+
 
 
 
