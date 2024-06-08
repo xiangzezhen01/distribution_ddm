@@ -8,7 +8,6 @@ from sklearn.metrics import mean_absolute_error
 
 import configs
 
-
 def re_to_bool(val, threshold = configs.RESIDUAL_ERRORS_THRESHOLD):
     return 0 if val <= threshold else 1
 
@@ -31,7 +30,7 @@ class DataProcessor:
         (self.sample_count, self.feather_count) = self.data.shape
         self.feather_count -= 1
 
-    def divide_dataset(self, rate=0.2, seed=42):
+    def divide_dataset(self, rate=configs.TRAIN_TEST_SPLIT, seed=42):
         self.train_count = int(self.sample_count * rate)
         self.test_count = self.sample_count - self.train_count
         X = self.data.iloc[:, :12]
@@ -239,13 +238,15 @@ other_data4 = "data/storm-obj2_feature6.csv"
 other_data5 = "data/storm-obj2_feature7.csv"
 other_data6 = "data/storm-obj2_feature8.csv"
 other_data7 = "data/storm-obj2_feature9.csv"
+
 # detect_drift_in_different_environment(data_path, [other_data1, other_data2, other_data3, other_data4, other_data5, other_data6, other_data7])
 
 # detect_drift_in_different_environment(data_path, [other_data7, other_data2, other_data3, other_data4, other_data5, other_data6, other_data1])
 
 
 #  目前没有添加适应算法
+#  训练新模型的时候需要添加到detector中
 #  detect_drift_in_same_environment(data_path)
-envlist = [other_data1, other_data2, other_data3, other_data4,other_data5, other_data6, other_data7]
+envlist = [other_data1, other_data2, other_data3, other_data4, other_data5, other_data6, other_data7]
 for env in envlist:
     detect_drift_in_different_environment(basedata=data_path, others=[env])
