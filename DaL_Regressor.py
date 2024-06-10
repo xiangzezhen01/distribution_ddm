@@ -60,10 +60,12 @@ class DaL_Regressor:
         self.data_smo()
         self.RFC = None
         self.train_RFC()
-        self.generate_cluster_test_label()
+        # self.generate_cluster_test_label()
         self.x_train = []
         self.y_train = []
         self.models = list()
+        self.DaL_Train_data()
+        self.train_DaL_DNNs()
 
 
     # todo: need to test the function
@@ -85,6 +87,15 @@ class DaL_Regressor:
         return cluster_indexes_all
 
     # build a random forest classifier to classify testing samples
+
+    def set_train(self, data):
+        data = get_whole_data(data)
+        (N, n) = data.shape
+        if N != self.N or n != self.n:
+            print("DataShapeError")
+        #todo: set other train
+
+
 
     def generate_cluster_train_label(self):
         clusters_list = list()
@@ -166,8 +177,10 @@ class DaL_Regressor:
             print('Training DNN for division {}... ({} samples)'.format(i + 1, len(self.clusters_train[i])))
             model = MLPSparseModel(config[i])
             model.build_train()
-            model.train(self.x_train,self.y_train,lr_opt[i])
+            model.train(self.x_train,self.y_train, lr_opt[i])
             self.models.append(model)
+
+    # def predict(self, x_test, ):
 
 
 
