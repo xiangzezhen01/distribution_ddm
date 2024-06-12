@@ -21,6 +21,7 @@ data4 = "data/data1/sac_7.csv"
 data5 = "data/data1/sac_8.csv"
 data6 = "data/data1/sac_9.csv"
 
+"""534"""
 base_data = "data/data2/x264_0.csv"
 data1 = "data/data2/x264_1.csv"
 data2 = "data/data2/x264_2.csv"
@@ -29,13 +30,11 @@ data4 = "data/data2/x264_4.csv"
 data5 = "data/data2/x264_5.csv"
 data6 = "data/data2/x264_6.csv"
 
-base_data = "data/data2/x264_0.csv"
-data1 = "data/data2/x264_1.csv"
-data2 = "data/data2/x264_2.csv"
-data3 = "data/data2/x264_3.csv"
-data4 = "data/data2/x264_4.csv"
-data5 = "data/data2/x264_5.csv"
-data6 = "data/data2/x264_6.csv"
+base_data = "data/storm-obj1_feature6.csv"
+data1 = "data/storm-obj1_feature7.csv"
+data2 = "data/storm-obj1_feature8.csv"
+data3 = "data/storm-obj1_feature9.csv"
+
 
 others = [data2, data3, data4]
 
@@ -55,9 +54,9 @@ y_base = base_sample.iloc[:, -1]
 y_base_pre = rfr.predict(x_base.values)
 aes = abs(y_base - y_base_pre)
 
-test1 = pd.read_csv(data5)
-test2 = pd.read_csv(data3)
-test3 = pd.read_csv(data4)
+test1 = pd.read_csv(data1)
+test2 = pd.read_csv(data2)
+test3 = pd.read_csv(data3)
 
 (N1, n1) = test1.shape
 (N2, n2) = test2.shape
