@@ -40,3 +40,6 @@ plt.title('Linear Regression (x in [4, 6])')
 plt.legend()
 
 plt.show()
+
+
+

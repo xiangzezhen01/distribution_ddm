@@ -27,13 +27,14 @@ class DataProcessor:
         self.test_count = 0
         self.data_path = data_path
         self.data = pd.read_csv(self.data_path, encoding="utf-8")
+        self.data.sample(200)
         (self.sample_count, self.feather_count) = self.data.shape
         self.feather_count -= 1
 
     def divide_dataset(self, rate=configs.TRAIN_TEST_SPLIT, seed=42):
         self.train_count = int(self.sample_count * rate)
         self.test_count = self.sample_count - self.train_count
-        X = self.data.iloc[:, :12]
+        X = self.data.iloc[:, :self.feather_count]
         Y = self.data.iloc[:, -1]
         x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=rate, random_state=seed)
         return x_train, x_test, y_train, y_test
@@ -108,9 +109,9 @@ def detect_drift_in_different_environment(basedata, others: list):
     dp = DataProcessor(basedata)
     x_train, x_test, y_train, y_test = dp.divide_dataset()
     rfr = RandomForestRegressor()
-    rfr.fit(x_train, y_train)
+    rfr.fit(x_train.values, y_train.values)
     print("NO drift sample count: " + str(dp.test_count))
-    y_pre0 = rfr.predict(x_test)
+    y_pre0 = rfr.predict(x_test.values)
     mae0 = abs(y_pre0 - y_test)
     ae0 = mean_absolute_error(
         y_test, y_pre0
@@ -122,6 +123,7 @@ def detect_drift_in_different_environment(basedata, others: list):
     print("in base dataset(without drift), the mre value is" + str(ae0))
     phtest = drift.PageHinkley(delta=0.002, threshold=10)
     adwin = drift.ADWIN()
+
     kswin = drift.KSWIN()
     ddm = drift.binary.DDM()
     eddm = drift.binary.EDDM()
@@ -139,9 +141,11 @@ def detect_drift_in_different_environment(basedata, others: list):
         if phtest.drift_detected:
             print(f"phChange detected at index {i}, input value: {val}")
 
+
         adwin.update(val)
         if adwin.drift_detected:
             print(f"adwinChange detected at index {i}, input value: {val}")
+
 
         kswin.update(val)
         if kswin.drift_detected:
@@ -150,6 +154,7 @@ def detect_drift_in_different_environment(basedata, others: list):
         ddm.update(re_to_bool(val))
         if ddm.drift_detected:
             print(f"ddmChange detected at index {i}, input value: {val}")
+
 
         eddm.update(re_to_bool(val))
         if eddm.drift_detected:
@@ -164,12 +169,17 @@ def detect_drift_in_different_environment(basedata, others: list):
             print(f"hddmaChange detected at index {i}, input value: {val}")
 
     for dataset in others:
-        dp = DataProcessor(dataset)
-        print("------in env:" + dataset.split('/')[-1] + "sample count: " + str(dp.sample_count) + "------")
-        X, Y = dp.data_formulate()
+        # dp = DataProcessor(dataset)
+        print("------in env:" + dataset.split('/')[-1]+"------")
+        # X, Y = dp.data_formulate()
+        df = pd.read_csv(dataset)
+        (N, n) = df.shape
+        dff = df.sample(int(N * 0.35))
+        X = dff.values[:, :-1]
+        Y = dff.values[:, -1]
         y_pre = rfr.predict(X)
         mae = abs(y_pre - Y)
-        mmre = abs(y_pre - Y) / Y
+        #mmre = abs(y_pre - Y) / Y
         mmse = (abs(y_pre - Y)) ** 2
         #mre = mean_absolute_percentage_error(Y, y_pre)
         mse = mean_squared_error(Y, y_pre)
@@ -233,7 +243,6 @@ data_path = "data/storm-obj1_feature6.csv"
 other_data1 = "data/storm-obj1_feature7.csv"
 other_data2 = "data/storm-obj1_feature8.csv"
 other_data3 = "data/storm-obj1_feature9.csv"
-
 other_data4 = "data/storm-obj2_feature6.csv"
 other_data5 = "data/storm-obj2_feature7.csv"
 other_data6 = "data/storm-obj2_feature8.csv"
@@ -247,6 +256,31 @@ other_data7 = "data/storm-obj2_feature9.csv"
 #  目前没有添加适应算法
 #  训练新模型的时候需要添加到detector中
 #  detect_drift_in_same_environment(data_path)
-envlist = [other_data1, other_data2, other_data3, other_data4, other_data5, other_data6, other_data7]
+"""envlist = [other_data1, other_data2, other_data3, other_data4, other_data5, other_data6, other_data7]
+for env in envlist:
+    detect_drift_in_different_environment(basedata=data_path, others=[env])"""
+
+data_path = "data/data1/sac_2.csv"
+other_data1 = "data/data1/sac_4.csv"
+other_data2 = "data/data1/sac_5.csv"
+other_data3 = "data/data1/sac_6.csv"
+other_data4 = "data/data1/sac_7.csv"
+other_data5 = "data/data1/sac_8.csv"
+other_data6 = "data/data1/sac_9.csv"
+"""envlist = [data_path, other_data1, other_data2, other_data3, other_data4, other_data5, other_data6]
+
+for env in envlist:
+    detect_drift_in_different_environment(basedata=data_path, others=[env])"""
+
+data_path = "data/data2/x264_0.csv"
+other_data1 = "data/data2/x264_1.csv"
+other_data2 = "data/data2/x264_2.csv"
+other_data3 = "data/data2/x264_3.csv"
+other_data4 = "data/data2/x264_4.csv"
+other_data5 = "data/data2/x264_5.csv"
+other_data6 = "data/data2/x264_6.csv"
+
+envlist = [data_path, other_data1, other_data2, other_data3, other_data4, other_data5, other_data6]
+
 for env in envlist:
     detect_drift_in_different_environment(basedata=data_path, others=[env])
