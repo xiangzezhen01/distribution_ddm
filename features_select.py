@@ -20,6 +20,7 @@ d2 = pd.read_csv(data1)
 d3 = pd.read_csv(data2)
 d4 = pd.read_csv(data3)
 
+
 whole_data = np.vstack([d1.values, d2.values, d3.values, d4.values])
 (N, n) = whole_data.shape
 
