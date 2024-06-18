@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 data0 = "data/data1/sac_2.csv"
 data1 = "data/data1/sac_4.csv"
@@ -17,7 +19,6 @@ data4 = "data/data2/x264_4.csv"
 data5 = "data/data2/x264_5.csv"
 data6 = "data/data2/x264_6.csv"
 
-
 data_files = [data0, data1, data2, data3, data4]
 test_data = []
 
@@ -30,9 +31,9 @@ L = np.array(list())
 i = 0
 
 for data in test_data:
-    tL = np.zeros(len(data))
-    tx = data[:, :-1]
-    ty = data[:, -1]
+    tL = np.zeros(30)
+    tx = data[30:60, :-1]
+    ty = data[30:60, -1]
     if i == 0:
         X = tx
         Y = ty
@@ -67,12 +68,26 @@ for i, c in enumerate(cluster):
     for x in c:
         X2I[x] = i
 gX = list(range(len(X)))
-for i,x in enumerate(gX):
+for i, x in enumerate(gX):
     gX[i] = X2I[x]
 gY = Y
 gL = L
 
+data = {
+    "X": gX,
+    "Y": gY,
+    "L": gL
+}
+df = pd.DataFrame(data)
+# 创建颜色映射
+palette = sns.color_palette("hsv", len(df['L'].unique()))
 
+# 绘制点图
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=df, x='X', y='Y', hue='L', palette=palette, s=100)
 
+# 显示图例
+plt.legend(title='L')
 
-
+# 显示图形
+plt.show()
