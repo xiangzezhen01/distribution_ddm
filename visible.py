@@ -31,9 +31,9 @@ L = np.array(list())
 i = 0
 
 for data in test_data:
-    tL = np.zeros(30)
-    tx = data[30:60, :-1]
-    ty = data[30:60, -1]
+    tL = np.zeros(50)
+    tx = data[30:80, :-1]
+    ty = data[30:80, -1]
     if i == 0:
         X = tx
         Y = ty
