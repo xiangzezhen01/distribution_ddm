@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn.feature_selection import mutual_info_regression
 import seaborn as sns
 
-data = "data/storm-obj1_feature6.csv"
+data = "data/data1/sac_5.csv"
 
 
 def eq_on_indexs(l1, l2, indexs):
@@ -21,7 +21,7 @@ ys = whole_data[:, -1]
 feature_weights = mutual_info_regression(whole_data[:, 0:n - 1], whole_data[:, n - 1], random_state=0)
 valid_features = list()
 for i, w in enumerate(feature_weights):
-    if w >= 0.2:
+    if w >= 0.1:
         valid_features.append(i)
 print(feature_weights)
 print(valid_features)

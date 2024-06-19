@@ -12,7 +12,7 @@ import configs
 def re_to_bool(val, threshold = configs.RESIDUAL_ERRORS_THRESHOLD):
     return 0 if val <= threshold else 1
 
-
+"""not good 534"""
 base_data = "data/data1/sac_2.csv"
 data1 = "data/data1/sac_4.csv"
 data2 = "data/data1/sac_5.csv"
@@ -22,13 +22,13 @@ data5 = "data/data1/sac_8.csv"
 data6 = "data/data1/sac_9.csv"
 
 """534"""
-base_data = "data/data2/x264_0.csv"
+"""base_data = "data/data2/x264_0.csv"
 data1 = "data/data2/x264_1.csv"
 data2 = "data/data2/x264_2.csv"
 data3 = "data/data2/x264_3.csv"
 data4 = "data/data2/x264_4.csv"
 data5 = "data/data2/x264_5.csv"
-data6 = "data/data2/x264_6.csv"
+data6 = "data/data2/x264_6.csv"""
 
 """base_data = "data/storm-obj1_feature6.csv"
 data1 = "data/storm-obj1_feature7.csv"
@@ -54,9 +54,9 @@ y_base = base_sample.iloc[:, -1]
 y_base_pre = rfr.predict(x_base.values)
 aes = abs(y_base - y_base_pre)
 
-test1 = pd.read_csv(data5)
-test2 = pd.read_csv(data3)
-test3 = pd.read_csv(data4)
+test1 = pd.read_csv(data6)
+test2 = pd.read_csv(data2)
+test3 = pd.read_csv(data3)
 
 (N1, n1) = test1.shape
 (N2, n2) = test2.shape
